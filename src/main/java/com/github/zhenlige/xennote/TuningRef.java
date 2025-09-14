@@ -49,11 +49,24 @@ public interface TuningRef {
 		}
 
 		public Tuning getTuning() {
-			Tuning tuning = WorldTunings.getCurrent().tunings.get(id);
-			if (tuning == null) {
-				Xennote.GLOBAL_LOGGER.error("Tuning not found, using JI instead");
+			try {
+				WorldTunings current = WorldTunings.getCurrent();
+				if (current == null || current.tunings == null) {
+					Xennote.GLOBAL_LOGGER.error("WorldTunings or tunings map is null, using JI instead");
+					return Tuning.ji();
+				}
+
+				Tuning tuning = current.tunings.get(id);
+				if (tuning == null) {
+					Xennote.GLOBAL_LOGGER.error("Tuning not found for id '" + id + "', using JI instead");
+					return Tuning.ji();
+				}
+
+				return tuning;
+			} catch (Exception e) {
+				Xennote.GLOBAL_LOGGER.error("Exception while retrieving tuning for id '" + id + "'", e);
 				return Tuning.ji();
-			} else return tuning;
+			}
 		}
 
 		public NbtString toNbt() {
